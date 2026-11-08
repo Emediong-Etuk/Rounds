@@ -20,7 +20,7 @@ export function telegramConfigured(): boolean {
 async function call<T>(method: string, body: Record<string, unknown>): Promise<T> {
   const token = config.telegramBotToken;
   if (!token) throw new TelegramError("Telegram bot is not configured", "not_configured");
-  const url = `https://api.telegram.org/bot${token}/${method}`;
+  const url = `${config.telegramApiBase}/bot${token}/${method}`;
   for (let attempt = 0; attempt < 2; attempt++) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);

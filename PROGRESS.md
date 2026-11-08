@@ -6,7 +6,7 @@
 - [x] Phase 2: search, board, virtual pharmacies (rules parser + 38 parser tests, live board, edit, holds, nudges, dev panel)
 - [x] Phase 3: agent (AGENTS.md, view-screen board snapshot + selection, automations installer, navigate-to-board, sendToAgentChat buttons). Live agent NOT tested here: no LLM key in this sandbox
 - [x] Phase 4: public reply link (/r/:token server-rendered, 3 KB, no JS; 48 h expiry; max 10 submissions; zod validation)
-- [ ] Phase 5: Telegram
+- [x] Phase 5: Telegram (webhook with secret check + dedupe, connect deep links + QR, ask with buttons, price/restock/alternative follow-ups, holds via buttons, nudges, acks). Tested against a local mock Bot API, not a real bot
 - [ ] Phase 6: stock memory + polish
 - [x] Phase 7: watch mode (list-watched-searches, re-ask-out-of-stock, rounds-watch automation, board button). Test with Settings → Automations → Run now
 - [ ] Phase 8: deploy + submission assets
@@ -96,3 +96,22 @@
 4. "Which is cheapest?" → answer matches the board.
 5. Click a card, then "Hold this one for Ada till 6pm" → Held ribbon.
 6. "I need tramadol" → kind refusal. "My son can't breathe" → 112 first.
+
+## Phase 5 notes
+- Verified with a mock Telegram API (`ROUNDS_TELEGRAM_API_BASE`, only for
+  local testing): wrong secret → 401; duplicate update_id ignored; /start
+  CODE connects; bad code / unknown chat get friendly replies; a button tap
+  from the wrong chat is rejected; ✅ → force-reply price prompt → "3,500"
+  → "👍 Noted: In stock, ₦3,500"; free text goes to the agent (fallback
+  reads it after 60 s); hold request shows first name only; ✅ confirms.
+- The "Reply with price →" URL button is only added when PUBLIC_BASE_URL
+  is https (Telegram rejects http URL buttons).
+
+## Manual steps for Greg (Telegram)
+1. @BotFather → /newbot → copy the token and username into `.env`
+   (`ROUNDS_TELEGRAM_BOT_TOKEN`, `ROUNDS_TELEGRAM_BOT_USERNAME`).
+2. Set `ROUNDS_TELEGRAM_WEBHOOK_SECRET` to 40 random letters/digits.
+3. Local: `cloudflared tunnel --url http://localhost:8080`, put the https
+   URL in `PUBLIC_BASE_URL`, restart dev, then `pnpm telegram:webhook`.
+4. Pharmacies page → Oakline / Palm Court / Harbour Meds → QR or Copy link
+   → friend taps Start → "You're connected as …".

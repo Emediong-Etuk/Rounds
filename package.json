@@ -15,7 +15,8 @@
     "test": "vitest --run --passWithNoTests",
     "agent-native:doctor": "agent-native doctor",
     "guards": "agent-native doctor",
-    "seed": "agent-native action seed-demo-data"
+    "seed": "agent-native action seed-demo-data",
+    "telegram:webhook": "tsx scripts/telegram-set-webhook.ts"
   },
   "dependencies": {
     "@agent-native/agentkit": "0.226.0",

@@ -22,6 +22,10 @@ export const config = {
     // guard:allow-env-credential — public bot username for deep links
     return process.env.ROUNDS_TELEGRAM_BOT_USERNAME?.replace(/^@/, "") || undefined;
   },
+  get telegramApiBase(): string {
+    // guard:allow-env-credential — deploy-level API base (only overridden for local mock testing)
+    return (process.env.ROUNDS_TELEGRAM_API_BASE || "https://api.telegram.org").replace(/\/+$/, "");
+  },
   get telegramWebhookSecret(): string | undefined {
     // guard:allow-env-credential — deploy-level webhook verification secret
     return process.env.ROUNDS_TELEGRAM_WEBHOOK_SECRET || undefined;
