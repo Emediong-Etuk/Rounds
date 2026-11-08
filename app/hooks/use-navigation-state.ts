@@ -18,6 +18,7 @@ export interface NavigationState {
   path?: string;
   publicPath?: string;
   threadId?: string;
+  searchId?: string;
 }
 
 export function useNavigationState() {
@@ -64,15 +65,20 @@ function matchesPathPrefix(pathname: string, prefix: string): boolean {
 
 export function navigationStateForPath(pathname: string): NavigationState {
   const threadId = threadIdFromPath(pathname);
+  const searchId = pathname.match(/^\/s\/([^/]+)/)?.[1];
   return {
     view: viewForPath(pathname),
     path: pathname,
     publicPath: appPathFromLocalRoute(pathname),
     ...(threadId ? { threadId } : {}),
+    ...(searchId ? { searchId: decodeURIComponent(searchId) } : {}),
   };
 }
 
 function viewForPath(pathname: string): string {
+  if (pathname.startsWith("/s/")) return "search";
+  if (pathname === "/rounds" || pathname.startsWith("/rounds/")) return "rounds";
+  if (pathname.startsWith("/pharmacies")) return "pharmacies";
   if (isChatPathname(pathname)) return "chat";
   if (pathname === HOME_PATH) return "home";
   if (pathname.startsWith("/database")) return "database";
@@ -88,6 +94,10 @@ function viewForPath(pathname: string): string {
 
 function pathForView(view?: string): string {
   switch (view) {
+    case "rounds":
+      return "/rounds";
+    case "pharmacies":
+      return "/pharmacies";
     case "chat":
     case "ask":
       return NEW_CHAT_PATH;
@@ -111,6 +121,9 @@ function pathForView(view?: string): string {
 }
 
 export function pathForCommand(command: any): string {
+  if (command?.view === "search" && typeof command?.searchId === "string") {
+    return `/s/${encodeURIComponent(command.searchId)}`;
+  }
   const path = pathForView(command?.view);
   if (command?.view !== "chat" && command?.view !== "ask") return path;
   const threadId =

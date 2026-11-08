@@ -14,8 +14,10 @@ import { OrgSwitcher } from "@agent-native/toolkit/app/org";
 import { openCommandMenu } from "@agent-native/toolkit/app/shared";
 import { AgentNativeIcon } from "@agent-native/toolkit/app/shared/AgentNativeIcon";
 import {
+  IconBuildingStore,
   IconEdit,
   IconHome,
+  IconPill,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconLoader2,
@@ -115,6 +117,51 @@ function persistActiveThreadId(threadId: string) {
   try {
     localStorage.setItem(CHAT_ACTIVE_THREAD_KEY, threadId);
   } catch {}
+}
+
+function RoundsNavLink({
+  collapsed,
+  to,
+  label,
+  icon,
+}: {
+  collapsed: boolean;
+  to: string;
+  label: string;
+  icon: "pill" | "store";
+}) {
+  const location = useLocation();
+  const active =
+    location.pathname === to ||
+    location.pathname.startsWith(`${to}/`) ||
+    (to === "/rounds" && location.pathname.startsWith("/s/"));
+  const Icon = icon === "pill" ? IconPill : IconBuildingStore;
+  const link = (
+    <Link
+      to={to}
+      aria-current={active ? "page" : undefined}
+      aria-label={collapsed ? label : undefined}
+      className={cn(
+        "flex items-center text-sidebar-accent-foreground transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        active && "bg-sidebar-accent",
+        collapsed
+          ? "size-8 justify-center rounded-md"
+          : "h-8 w-full gap-3 rounded-lg px-3 text-sm font-medium",
+      )}
+    >
+      <Icon className="size-4 shrink-0" strokeWidth={1.8} />
+      <span className={collapsed ? "sr-only" : "truncate"}>{label}</span>
+    </Link>
+  );
+  if (collapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right">{label}</TooltipContent>
+      </Tooltip>
+    );
+  }
+  return link;
 }
 
 function HomeNavLink({ collapsed }: { collapsed: boolean }) {
@@ -407,6 +454,8 @@ export function Sidebar({
           collapsed ? "items-center gap-1 px-1 py-2" : "pt-1",
         )}
       >
+        <RoundsNavLink collapsed={collapsed} to="/rounds" label="Find medicine" icon="pill" />
+        <RoundsNavLink collapsed={collapsed} to="/pharmacies" label="Pharmacies" icon="store" />
         <HomeNavLink collapsed={collapsed} />
         <ChatThreadsSection collapsed={collapsed} />
       </nav>

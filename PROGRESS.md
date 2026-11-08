@@ -3,7 +3,7 @@
 ## Status
 - [x] Phase 0: scaffold + spikes
 - [x] Phase 1: data + seed (schema, migration, seed-on-boot, resolve-drug, list-areas, find-pharmacies, tests)
-- [ ] Phase 2: search, board, virtual pharmacies
+- [x] Phase 2: search, board, virtual pharmacies (rules parser + 38 parser tests, live board, edit, holds, nudges, dev panel)
 - [ ] Phase 3: agent
 - [ ] Phase 4: public reply link
 - [ ] Phase 5: Telegram
@@ -54,3 +54,24 @@
 - 24 fictional pharmacies: 12 virtual (6 personas × PH and Uyo), 3 demo-phone
   pharmacies near Rumuola/GRA for real Telegram (connect codes OAKLN7, PLMCT8,
   HRBMD9), 9 directory-only.
+
+## Phase 2 notes
+- Domain home is `/rounds` (sign-in lands there via `homePath`); board is
+  `/s/:id`; directory is `/pharmacies`. The template's `/home` and `/chat`
+  are unchanged.
+- In DEMO_MODE, demo pharmacies show "Silent" after 75 s (real pharmacies:
+  15 min) so the Nudge button appears during a demo. The silent persona
+  answers a nudge ~15 s later.
+- Two-user isolation checked with the CLI: another account gets
+  "Search not found" / "Ask not found".
+
+## Manual tests (Phase 2)
+1. `pnpm exec agent-native dev --host 127.0.0.1`, open http://127.0.0.1:8080,
+   "Continue as local dev".
+2. Find medicine → type "ventolin" → Find it → Yes → Ask 6 pharmacies.
+3. Within ~45 s: 2 in stock with prices, 1 alternative (Asthalin), 1 out
+   (with restock day), 1 unclear, 1 silent.
+4. Edit a card → set a new price → tag changes to "Edited by you".
+5. Hold on an in-stock card → first name + time → "Held for … until …"
+   within ~15 s.
+6. Wait ~75 s → silent card shows Nudge → tap → it replies.
