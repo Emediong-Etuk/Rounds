@@ -7,9 +7,9 @@
 - [x] Phase 3: agent (AGENTS.md, view-screen board snapshot + selection, automations installer, navigate-to-board, sendToAgentChat buttons). Live agent NOT tested here: no LLM key in this sandbox
 - [x] Phase 4: public reply link (/r/:token server-rendered, 3 KB, no JS; 48 h expiry; max 10 submissions; zod validation)
 - [x] Phase 5: Telegram (webhook with secret check + dedupe, connect deep links + QR, ask with buttons, price/restock/alternative follow-ups, holds via buttons, nudges, acks). Tested against a local mock Bot API, not a real bot
-- [ ] Phase 6: stock memory + polish
+- [x] Phase 6: stock memory pills, best-option banner, all-out state, widen to 10 km, card arrival animation, 360 px mobile layout (no sideways scroll), emergency footer, Rounds agent-sidebar suggestions
 - [x] Phase 7: watch mode (list-watched-searches, re-ask-out-of-stock, rounds-watch automation, board button). Test with Settings → Automations → Run now
-- [ ] Phase 8: deploy + submission assets
+- [~] Phase 8: production build verified, render.yaml, README, DEMO.md, reset-demo action, docs/board.png. NOT deployed (needs Greg's Render/Neon accounts)
 
 ## Framework facts (checked against installed @agent-native/core 0.226.0)
 - Template: Chat (`--standalone --template chat`). No DB files shipped; we add
@@ -115,3 +115,25 @@
    URL in `PUBLIC_BASE_URL`, restart dev, then `pnpm telegram:webhook`.
 4. Pharmacies page → Oakline / Palm Court / Harbour Meds → QR or Copy link
    → friend taps Start → "You're connected as …".
+
+## What's next / what Greg must do by hand
+1. Add `ANTHROPIC_API_KEY` locally and run the Phase 3 manual tests (the
+   live agent has not been run in this sandbox).
+2. Create the Telegram bot and connect 2–3 friends (Phase 5 steps above).
+3. Deploy: Neon Postgres → `DATABASE_URL=... pnpm migrate:production` →
+   Render web service from `render.yaml` (paid "starter", not Free) → set env
+   vars (`PUBLIC_BASE_URL` = the onrender.com URL) → `pnpm telegram:webhook`
+   with production env → check the full flow from a phone.
+4. Put the public URL (and a demo account if you want one) in README.
+5. Record the video with DEMO.md.
+
+## Test checklist status
+- [x] Unit: parser (39 cases), matching, ranking, haversine, price parsing
+- [x] Controlled drug refused (UI sheet + start-search `controlled_drug`)
+- [x] Unknown area → `unknown_area` with suggestions
+- [x] Duplicate Telegram update ignored; wrong secret → 401; wrong-chat tap rejected
+- [x] Expired/unknown reply token → friendly page; invalid input re-renders form
+- [x] Unprocessed message > 60 s → rules fallback records it
+- [x] Two accounts can't see each other's searches; Doctor passes
+- [x] 360 px layout; reply page is 3 KB with no JS
+- [ ] Agent: Rx mention, emergency → 112, user edit visible next turn (needs key)

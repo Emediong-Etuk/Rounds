@@ -76,3 +76,11 @@ describe("parsePrice", () => {
     expect(parsePrice("3k5")).toBe(3500);
   });
 });
+
+describe("alternativeText", () => {
+  it("drops the trailing price", () => {
+    const r = parseReply("No Ventolin but we have Asthalin 100mcg, 3700", { strength: "100mcg", form: "inhaler" });
+    expect(r.alternativeText).toBe("we have Asthalin 100mcg");
+    expect(r.priceNaira).toBe(3700);
+  });
+});

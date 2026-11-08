@@ -1,0 +1,34 @@
+# Render blueprint for Rounds (long-running Node web service).
+# Needs a hosted Postgres (e.g. Neon). Don't use the Free instance type for
+# the demo: it sleeps after 15 min, which stops demo-pharmacy timers and the
+# watch-mode scheduler.
+services:
+  - type: web
+    name: rounds
+    runtime: node
+    plan: starter
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && NITRO_PRESET=render_com pnpm build
+    preDeployCommand: pnpm migrate:production
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /api/telegram/ping
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: ROUNDS_TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: ROUNDS_TELEGRAM_BOT_USERNAME
+        sync: false
+      - key: ROUNDS_TELEGRAM_WEBHOOK_SECRET   # 32+ chars of A-Z a-z 0-9 _ - (Telegram's rule)
+        sync: false
+      - key: DEMO_MODE
+        value: "true"
+      - key: REPLY_PARSER
+        value: agent

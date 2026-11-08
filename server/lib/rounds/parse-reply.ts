@@ -164,7 +164,12 @@ function mentionedForms(t: string): string[] {
 
 function alternativeClause(raw: string): string | undefined {
   const m = raw.match(/\b(?:but|only|instead|however)\b[\s,:-]*(.+)$/i);
-  const text = (m?.[1] ?? raw).trim().replace(/[.!]+$/, "");
+  const text = (m?.[1] ?? raw)
+    .trim()
+    .replace(/[.!]+$/, "")
+    // Drop a trailing price ("…, 3700", "… 3.5k", "… ₦3,000"): it's stored separately.
+    .replace(/[\s,;:-]*(?:₦|n|ngn)?\s?\d[\d,.]*\s?(?:k\d?|naira)?\s*$/i, "")
+    .trim();
   return text ? text.slice(0, 200) : undefined;
 }
 

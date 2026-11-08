@@ -625,8 +625,10 @@ export async function getSearchCore(ownerEmail: string, id: string, opts: { fall
     const p = phById.get(a.pharmacyId)!;
     const rs = replies.filter((r) => r.askId === a.id);
     const ms = messages.filter((m) => m.askId === a.id);
-    const inbound = ms.filter((m) => m.direction === "in");
-    const lastIn = inbound[inbound.length - 1];
+    // Pharmacist words only: skip system notes and button taps.
+    const inbound = ms.filter((m) => m.direction === "in" && m.channel !== "system");
+    const spoken = inbound.filter((m) => !m.text.startsWith("[button]"));
+    const lastIn = spoken[spoken.length - 1];
     const hs = holds.filter((h) => h.askId === a.id && h.status !== "cancelled");
     const hold = hs[hs.length - 1];
     const latest = rs[rs.length - 1];
@@ -707,7 +709,7 @@ export async function getSearchCore(ownerEmail: string, id: string, opts: { fall
   const sentTimes = asks.map((a) => a.sentAt).filter((t): t is number => Boolean(t));
   if (sentTimes.length) timeline.push({ at: Math.min(...sentTimes), kind: "sent", text: `Sent to ${sentTimes.length} pharmacies` });
   for (const m of messages) {
-    if (m.direction === "in") timeline.push({ at: m.createdAt, kind: "in", text: `${nameOf(m.askId)}: “${m.text.slice(0, 80)}”` });
+    if (m.direction === "in" && m.channel !== "system") timeline.push({ at: m.createdAt, kind: "in", text: `${nameOf(m.askId)}: “${m.text.replace(/^\[button\]\s*/, "").slice(0, 80)}”` });
     else if (m.channel !== "system" && !m.text.startsWith("Rounds stock check")) timeline.push({ at: m.createdAt, kind: "out", text: `To ${nameOf(m.askId)}: “${m.text.slice(0, 80)}”` });
   }
   for (const r of replies) {

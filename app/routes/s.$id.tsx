@@ -437,9 +437,9 @@ export default function BoardRoute() {
         <>
           <button
             onClick={() => setDevOpen(true)}
-            className="fixed bottom-5 left-5 z-30 inline-flex md:left-[calc(var(--chat-sidebar-width)+1.25rem)] items-center gap-1.5 rounded-full bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-lg hover:bg-indigo-700"
+            className="fixed bottom-4 right-4 z-30 inline-flex md:bottom-5 md:right-auto md:left-[calc(var(--chat-sidebar-width)+1.25rem)] items-center gap-1.5 rounded-full bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-lg hover:bg-indigo-700"
           >
-            <IconFlask className="size-4" /> Simulate a reply
+            <IconFlask className="size-4" /> <span className="hidden sm:inline">Simulate a reply</span><span className="sm:hidden">Simulate</span>
           </button>
           <DevPanel open={devOpen} onClose={() => setDevOpen(false)} asks={data.asks} />
         </>
