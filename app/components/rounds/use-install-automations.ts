@@ -1,7 +1,7 @@
 import { callAction } from "@agent-native/core/client/hooks";
 import { useEffect } from "react";
 
-const KEY = "rounds.automations.v1";
+const KEY = "rounds.automations.v2";
 
 /** Install the per-user Rounds automations once per browser (the action is idempotent). */
 export function useInstallRoundsAutomations() {

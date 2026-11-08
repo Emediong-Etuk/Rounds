@@ -1,7 +1,7 @@
 import { resourceGetByPath, resourcePut } from "@agent-native/core/resources";
 
 // Per-user automation resources. Bump the version tag to rewrite them.
-const VERSION = "rounds-v1";
+const VERSION = "rounds-v2";
 
 const PARSE_REPLY = `---
 schedule: ""
