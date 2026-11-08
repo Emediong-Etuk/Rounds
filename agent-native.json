@@ -4,6 +4,13 @@
     "firstRun": "off"
   },
   "doctor": {
-    "failOnBuild": false
+    "failOnBuild": false,
+    "dbToolScopingDenylist": {
+      "areas": "Public reference data (area names and centroids); no user data. Read via list-areas.",
+      "drugs": "Public demo medicine catalog; no user data. Read via resolve-drug.",
+      "pharmacies": "Shared pharmacy directory; no customer data. Read and written via pharmacy actions.",
+      "stock_observations": "Global stock memory (pharmacy, drug, price, time); holds no user data by design.",
+      "telegram_updates": "Webhook idempotency keys (update ids only)."
+    }
   }
 }

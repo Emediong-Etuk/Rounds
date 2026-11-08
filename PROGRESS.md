@@ -2,7 +2,7 @@
 
 ## Status
 - [x] Phase 0: scaffold + spikes
-- [ ] Phase 1: data + seed
+- [x] Phase 1: data + seed (schema, migration, seed-on-boot, resolve-drug, list-areas, find-pharmacies, tests)
 - [ ] Phase 2: search, board, virtual pharmacies
 - [ ] Phase 3: agent
 - [ ] Phase 4: public reply link
@@ -47,3 +47,10 @@
 ## Manual steps for Greg
 - Put `ANTHROPIC_API_KEY` in `.env` (or connect a provider in Settings → Agent)
   — the agent and the reply-reading automation need it.
+- Seed runs automatically on boot when the `drugs` table is empty
+  (`server/plugins/rounds-boot.ts`). Re-seed any time with
+  `pnpm action seed-demo-data` (idempotent, keeps Telegram connections).
+  `pnpm seed` is not used because PGlite is single-process.
+- 24 fictional pharmacies: 12 virtual (6 personas × PH and Uyo), 3 demo-phone
+  pharmacies near Rumuola/GRA for real Telegram (connect codes OAKLN7, PLMCT8,
+  HRBMD9), 9 directory-only.

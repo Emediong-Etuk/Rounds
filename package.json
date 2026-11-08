@@ -15,7 +15,7 @@
     "test": "vitest --run --passWithNoTests",
     "agent-native:doctor": "agent-native doctor",
     "guards": "agent-native doctor",
-    "seed": "tsx server/db/seed.ts"
+    "seed": "agent-native action seed-demo-data"
   },
   "dependencies": {
     "@agent-native/agentkit": "0.226.0",
