@@ -5,7 +5,7 @@
 - [x] Phase 1: data + seed (schema, migration, seed-on-boot, resolve-drug, list-areas, find-pharmacies, tests)
 - [x] Phase 2: search, board, virtual pharmacies (rules parser + 38 parser tests, live board, edit, holds, nudges, dev panel)
 - [x] Phase 3: agent (AGENTS.md, view-screen board snapshot + selection, automations installer, navigate-to-board, sendToAgentChat buttons). Live agent NOT tested here: no LLM key in this sandbox
-- [ ] Phase 4: public reply link
+- [x] Phase 4: public reply link (/r/:token server-rendered, 3 KB, no JS; 48 h expiry; max 10 submissions; zod validation)
 - [ ] Phase 5: Telegram
 - [ ] Phase 6: stock memory + polish
 - [x] Phase 7: watch mode (list-watched-searches, re-ask-out-of-stock, rounds-watch automation, board button). Test with Settings → Automations → Run now
