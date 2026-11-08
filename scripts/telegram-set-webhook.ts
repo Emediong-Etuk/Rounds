@@ -2,15 +2,9 @@
 // Reads ROUNDS_TELEGRAM_BOT_TOKEN, ROUNDS_TELEGRAM_WEBHOOK_SECRET and
 // PUBLIC_BASE_URL from the environment (or .env), registers the webhook and
 // prints getWebhookInfo. Never prints the token.
-import { readFileSync } from "node:fs";
-
 function loadDotEnv() {
   try {
-    for (const line of readFileSync(".env", "utf8").split("\n")) {
-      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
-      // guard:allow-env-mutation — one-off CLI script, not request-scoped
-      if (m && !process.env[m[1]!]) process.env[m[1]!] = m[2]!.replace(/^["']|["']$/g, "");
-    }
+    process.loadEnvFile(".env");
   } catch {
     // no .env; rely on the environment
   }
