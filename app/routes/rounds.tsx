@@ -25,6 +25,7 @@ import {
   StatusChip,
   timeAgo,
 } from "@/components/rounds/status";
+import { useInstallRoundsAutomations } from "@/components/rounds/use-install-automations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,6 +77,7 @@ const QUICK_PROMPTS = [
 ];
 
 export default function RoundsHome() {
+  useInstallRoundsAutomations();
   const [query, setQuery] = useState("");
   const [areaName, setAreaName] = useState("Rumuola");
   const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null);

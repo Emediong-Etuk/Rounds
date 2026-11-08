@@ -106,9 +106,13 @@ function deliver(ask: Ask, search: Search, pharmacy: Pharmacy, text: string, del
   }, delayMs).unref?.();
 }
 
-export function scheduleVirtualReply(ask: Ask, search: Search, pharmacy: Pharmacy) {
+export function scheduleVirtualReply(ask: Ask, search: Search, pharmacy: Pharmacy, reask = false) {
   const persona = (pharmacy.virtualPersona ?? "fast_pidgin") as VirtualPersona;
-  const r = firstReply(persona, search);
+  // Watch mode: the "out" pharmacy has restocked when asked again.
+  const r =
+    reask && persona === "out_with_eta"
+      ? { text: `e don come o! we get am now, ${priceFor(search)}`, delayMs: rand(8_000, 15_000) }
+      : firstReply(persona, search);
   if (r) deliver(ask, search, pharmacy, r.text, r.delayMs);
 }
 

@@ -4,6 +4,8 @@ import { buildDeepLink } from "@agent-native/core/server";
 import { z } from "zod";
 
 import { requireUser } from "../server/lib/rounds/auth.js";
+import { ensureRoundsAutomations } from "../server/lib/rounds/automations.js";
+import { config } from "../server/lib/rounds/config.js";
 import { startSearchCore } from "../server/lib/rounds/core.js";
 
 export default defineAction({
@@ -38,6 +40,10 @@ export default defineAction({
   }),
   run: async (args, ctx) => {
     const owner = requireUser(ctx);
+    // The reply-reading automation must exist before the first reply arrives.
+    if (config.replyParser === "agent") {
+      await ensureRoundsAutomations(owner).catch((err) => console.error("[rounds] automation install failed", err));
+    }
     const result = await startSearchCore(owner, args);
     if (ctx?.caller === "tool") {
       await writeAppStateForCurrentTab("navigate", {

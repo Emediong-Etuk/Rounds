@@ -276,16 +276,17 @@ export async function sendAskCore(
   search: SearchRow,
   ask: AskRow,
   pharmacy: PharmacyRow,
+  opts: { reask?: boolean } = {},
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   const db = getDb();
   const now = Date.now();
   const copy = { ...searchCopy(search), askedAt: now };
-  const text = askMessageText(copy);
+  const text = (opts.reask ? "Checking again: " : "") + askMessageText(copy);
 
   if (ask.channel === "virtual") {
     await db.update(schema.asks).set({ status: "sent", sentAt: now }).where(eq(schema.asks.id, ask.id));
     await logMessage({ ownerEmail: ask.ownerEmail, askId: ask.id, pharmacyId: pharmacy.id, direction: "out", channel: "virtual", text });
-    scheduleVirtualReply({ ...ask, sentAt: now }, search, pharmacy);
+    scheduleVirtualReply({ ...ask, sentAt: now }, search, pharmacy, opts.reask);
     return { ok: true };
   }
 
@@ -962,4 +963,54 @@ export async function cancelHoldCore(ownerEmail: string, holdId: string) {
     await notifyPharmacy(ask, `Hold cancelled: ${search.drugLabel} for ${hold.customerFirstName}. You don't need to keep it aside. Thank you!`, COPY.holdCancelled(search.drugLabel, hold.customerFirstName)).catch(() => undefined);
   }
   return { holdId, status: "cancelled" };
+}
+
+// ── Watch mode ─────────────────────────────────────────────────────────────
+
+const REASK_AFTER_MS = 3 * 60 * 60 * 1000;
+const DEMO_REASK_AFTER_MS = 2 * 60 * 1000;
+
+export async function listWatchedSearchesCore(ownerEmail: string) {
+  const rows = await getDb()
+    .select({ id: schema.searches.id })
+    .from(schema.searches)
+    .where(and(eq(schema.searches.ownerEmail, ownerEmail), eq(schema.searches.watch, true)))
+    .orderBy(desc(schema.searches.createdAt))
+    .limit(20);
+  const boards = await Promise.all(rows.map((r) => getSearchCore(ownerEmail, r.id, { fallback: false })));
+  return boards.map((b) => ({
+    searchId: b.search.id,
+    drug: b.search.drugLabel,
+    area: b.search.areaLabel,
+    hasInStock: b.counts.inStock > 0,
+    counts: b.counts,
+    lastWatchRunAt: b.search.lastWatchRunAt,
+  }));
+}
+
+/** Re-send to pharmacies whose latest answer is out (or that stayed silent). */
+export async function reAskOutOfStockCore(ownerEmail: string, searchId: string, force = false) {
+  const db = getDb();
+  const search = await loadSearch(ownerEmail, searchId);
+  const board = await getSearchCore(ownerEmail, searchId, { fallback: false });
+  const now = Date.now();
+  const due = board.asks.filter((a) => {
+    if (a.displayStatus !== "out_of_stock" && a.displayStatus !== "silent") return false;
+    const threshold = a.channel === "virtual" && config.demoMode ? DEMO_REASK_AFTER_MS : REASK_AFTER_MS;
+    return force || !a.sentAt || now - a.sentAt >= threshold;
+  });
+  const asks = due.length
+    ? await db.select().from(schema.asks).where(and(eq(schema.asks.ownerEmail, ownerEmail), inArray(schema.asks.id, due.map((a) => a.id))))
+    : [];
+  let resent = 0;
+  for (const ask of asks) {
+    const pharmacy = await loadPharmacy(ask.pharmacyId);
+    const r = await sendAskCore(search, { ...ask, status: "sent" }, pharmacy, { reask: true });
+    if (r.ok) resent++;
+  }
+  await db
+    .update(schema.searches)
+    .set({ lastWatchRunAt: now, updatedAt: now, ...(resent ? { status: "asking" } : {}) })
+    .where(and(eq(schema.searches.id, searchId), eq(schema.searches.ownerEmail, ownerEmail)));
+  return { searchId, resent, skipped: board.asks.length - resent };
 }

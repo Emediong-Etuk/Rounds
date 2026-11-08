@@ -40,6 +40,7 @@ import {
   timeAgo,
   type DisplayStatus,
 } from "@/components/rounds/status";
+import { useInstallRoundsAutomations } from "@/components/rounds/use-install-automations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,6 +91,7 @@ function sourceTag(source: string | undefined, confidence: number | null | undef
 }
 
 export default function BoardRoute() {
+  useInstallRoundsAutomations();
   const { id = "" } = useParams();
   const queryClient = useQueryClient();
   const [fast, setFast] = useState(true);

@@ -4,11 +4,11 @@
 - [x] Phase 0: scaffold + spikes
 - [x] Phase 1: data + seed (schema, migration, seed-on-boot, resolve-drug, list-areas, find-pharmacies, tests)
 - [x] Phase 2: search, board, virtual pharmacies (rules parser + 38 parser tests, live board, edit, holds, nudges, dev panel)
-- [ ] Phase 3: agent
+- [x] Phase 3: agent (AGENTS.md, view-screen board snapshot + selection, automations installer, navigate-to-board, sendToAgentChat buttons). Live agent NOT tested here: no LLM key in this sandbox
 - [ ] Phase 4: public reply link
 - [ ] Phase 5: Telegram
 - [ ] Phase 6: stock memory + polish
-- [ ] Phase 7: watch mode (stretch)
+- [x] Phase 7: watch mode (list-watched-searches, re-ask-out-of-stock, rounds-watch automation, board button). Test with Settings → Automations → Run now
 - [ ] Phase 8: deploy + submission assets
 
 ## Framework facts (checked against installed @agent-native/core 0.226.0)
@@ -75,3 +75,24 @@
 5. Hold on an in-stock card → first name + time → "Held for … until …"
    within ~15 s.
 6. Wait ~75 s → silent card shows Nudge → tap → it replies.
+
+## Phase 3 notes
+- `REPLY_PARSER=agent` (default): each pharmacist message emits
+  `pharmacy.message.received`; the per-user automation
+  `jobs/parse-pharmacy-reply.md` has the agent read it. Automations are
+  installed on the first search (server) and once per browser (UI).
+- Verified locally: event → automation dispatch (stops at
+  `missing_credentials` here) and the 60 s rules fallback in `get-search`.
+- If the automation fails 3× in a row (e.g. no key), the framework pauses
+  it. After adding a key, re-enable it in Settings → Automations (or wait
+  ~15 min for the scheduler to resume it).
+
+## Manual tests (Phase 3) — need ANTHROPIC_API_KEY
+1. Chat: "I need a Ventolin inhaler around Rumuola" → agent confirms
+   salbutamol 100mcg (Rx note) → proposes pharmacies → "yes" → board opens.
+2. Cards show "Read by Rounds AI · NN%" (not "Read automatically").
+3. Kindway (confused persona) asks "which one?" → agent sends one
+   clarifying message → Kindway answers "ok inhaler dey, …" → in stock.
+4. "Which is cheapest?" → answer matches the board.
+5. Click a card, then "Hold this one for Ada till 6pm" → Held ribbon.
+6. "I need tramadol" → kind refusal. "My son can't breathe" → 112 first.
