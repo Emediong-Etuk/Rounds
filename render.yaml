@@ -7,6 +7,7 @@ services:
     name: rounds
     runtime: node
     plan: starter
+    region: frankfurt   # closest Render region to Nigeria; put Neon in AWS Frankfurt too
     buildCommand: corepack enable && pnpm install --frozen-lockfile && NITRO_PRESET=render_com pnpm build
     preDeployCommand: pnpm migrate:production
     startCommand: node .output/server/index.mjs
