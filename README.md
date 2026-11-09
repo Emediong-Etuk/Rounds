@@ -124,7 +124,7 @@ See `.env.example`. `ANTHROPIC_API_KEY`, `DATABASE_URL`, `BETTER_AUTH_SECRET` (p
 
 ## Deploy
 
-Use a long-running Node host (Render, Railway or Fly.io) plus hosted Postgres (Neon). Live sync, demo-pharmacy timers and the watch-mode scheduler need a process that stays up; don't use Lambda or a sleeping free tier. `render.yaml` is a ready blueprint:
+Use a long-running Node host (Railway, Render or Fly.io) plus hosted Postgres. `railway.json` (Railway + its Postgres; tables and demo data are created on first boot) and `render.yaml` (Render + Neon) are ready. Live sync, demo-pharmacy timers and the watch-mode scheduler need a process that stays up; don't use Lambda or a sleeping free tier. `render.yaml` is a ready blueprint:
 
 ```bash
 pnpm migrate:production   # with DATABASE_URL set to the Neon URL
