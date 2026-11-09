@@ -174,6 +174,19 @@ export async function startSearchCore(ownerEmail: string, input: StartSearchInpu
   if (!ids.length) fail("Pick at least one pharmacy.", { errorCode: "no_pharmacies", statusCode: 400 });
 
   let catalogDrug = input.drug.drugId ? await getDrugById(input.drug.drugId) : null;
+  if (!catalogDrug) {
+    // The agent sometimes omits drugId; recover the catalog entry so the Rx
+    // flag and brand names are never lost.
+    const catalog = await loadCatalog();
+    const key = makeDrugKey(input.drug.genericName, input.drug.strength, input.drug.form);
+    catalogDrug =
+      catalog.find((d) => d.drugKey === key) ??
+      (() => {
+        const top = matchDrugs(`${input.drug.label} ${input.drug.genericName}`, catalog, 1).matches[0];
+        const sameStrength = !input.drug.strength || top?.strength?.replace(/\s+/g, "").toLowerCase() === input.drug.strength.replace(/\s+/g, "").toLowerCase();
+        return top && top.score >= 0.95 && sameStrength ? top : null;
+      })();
+  }
   const genericName = catalogDrug?.genericName ?? input.drug.genericName;
   const strength = catalogDrug?.strength ?? input.drug.strength ?? null;
   const form = catalogDrug?.form ?? input.drug.form ?? null;

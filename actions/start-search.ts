@@ -15,7 +15,7 @@ export default defineAction({
     rawQuery: z.string().min(1).max(300).describe("What the user originally asked for"),
     drug: z
       .object({
-        drugId: z.string().optional().describe("Catalog id from resolve-drug (preferred)"),
+        drugId: z.string().optional().describe("Catalog id from resolve-drug matches[].id. ALWAYS pass it when resolve-drug returned a match"),
         label: z.string().min(1).max(120).describe('Display label, e.g. "Salbutamol 100mcg inhaler"'),
         genericName: z.string().min(1).max(80).describe("Active ingredient"),
         strength: z.string().max(40).optional().describe('e.g. "100mcg"'),

@@ -4,7 +4,7 @@
 - [x] Phase 0: scaffold + spikes
 - [x] Phase 1: data + seed (schema, migration, seed-on-boot, resolve-drug, list-areas, find-pharmacies, tests)
 - [x] Phase 2: search, board, virtual pharmacies (rules parser + 38 parser tests, live board, edit, holds, nudges, dev panel)
-- [x] Phase 3: agent (AGENTS.md, view-screen board snapshot + selection, automations installer, navigate-to-board, sendToAgentChat buttons). Live agent NOT tested here: no LLM key in this sandbox
+- [x] Phase 3: agent (AGENTS.md, view-screen board snapshot + selection, automations installer, navigate-to-board, sendToAgentChat buttons). Live agent tested end to end on Nov 9 (see below)
 - [x] Phase 4: public reply link (/r/:token server-rendered, 3 KB, no JS; 48 h expiry; max 10 submissions; zod validation)
 - [x] Phase 5: Telegram (webhook with secret check + dedupe, connect deep links + QR, ask with buttons, price/restock/alternative follow-ups, holds via buttons, nudges, acks). Tested against a local mock Bot API, not a real bot
 - [x] Phase 6: stock memory pills, best-option banner, all-out state, widen to 10 km, card arrival animation, 360 px mobile layout (no sideways scroll), emergency footer, Rounds agent-sidebar suggestions
@@ -137,3 +137,16 @@
 - [x] Two accounts can't see each other's searches; Doctor passes
 - [x] 360 px layout; reply page is 3 KB with no JS
 - [ ] Agent: Rx mention, emergency → 112, user edit visible next turn (needs key)
+
+## Agent test results (Nov 9, via OpenRouter free model nvidia/nemotron-3-ultra-550b-a55b:free)
+OpenRouter account had $0 credit, so Claude couldn't be used; a free model stood in.
+- [x] Chat: medicine confirmed with Rx note + equivalents question, 8 pharmacies proposed with stock memory
+- [x] "Yes, ask them" → start-search → board
+- [x] Replies read by the agent ("Read by Rounds AI · 95%"): in stock + price, out + Thursday, alternative + price
+- [x] Confused pharmacy: agent replied to their question, follow-up "ok inhaler dey" recorded in stock
+- [x] "Which is cheapest and closest?" answered from the board
+- [x] Card selected + "Hold this one for Ada till 9pm" → hold confirmed, board shows 📌
+- [x] Tramadol refused kindly; emergency → "Go to the nearest hospital or call 112" first
+- Fixed: agent sometimes omitted drugId → search lost the Rx flag and brand names. start-search now recovers the catalog entry.
+- Cosmetic: automation runs appear as "Trigger: parse-pharmacy-reply" threads in the sidebar chat list.
+- The automation reads one message at a time (~10-30 s each with this model); the 60 s fallback still applies.
